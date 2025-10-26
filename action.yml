@@ -1,0 +1,65 @@
+name: 'Turborepo Summary'
+description: 'Generate and publish Turborepo run summaries to GitHub Summary'
+author: 'Nicolas Charpentier'
+branding:
+  icon: 'info'
+  color: 'blue'
+
+inputs:
+  turbo-runs-path:
+    description: 'Path to the .turbo/runs directory'
+    required: false
+    default: '.turbo/runs'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Generate Turborepo Summary
+      shell: bash
+      run: |
+        RUNS_PATH="${{ inputs.turbo-runs-path }}"
+
+        # Check if the runs directory exists
+        if [ ! -d "$RUNS_PATH" ]; then
+          echo "::notice::No Turborepo runs found at $RUNS_PATH"
+          exit 0
+        fi
+
+        # Find all JSON files in the runs directory
+        shopt -s nullglob
+        RUN_FILES=("$RUNS_PATH"/*.json)
+
+        if [ ${#RUN_FILES[@]} -eq 0 ]; then
+          echo "::notice::No Turborepo run files found in $RUNS_PATH"
+          exit 0
+        fi
+
+        echo "Found ${#RUN_FILES[@]} Turborepo run file(s)"
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "# 🚀 Turborepo Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        # Process each run file
+        for run_file in "${RUN_FILES[@]}"; do
+          echo "Processing: $run_file"
+
+          # Extract the hash from the filename
+          hash=$(basename "$run_file" .json)
+
+          echo "## Run: \`$hash\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Run turborepo-summary and append to GitHub summary
+          if npx --yes turborepo-summary@v1 "$run_file" >> $GITHUB_STEP_SUMMARY 2>&1; then
+            echo "✓ Successfully generated summary for $hash"
+          else
+            echo "::warning::Failed to generate summary for $run_file"
+            echo "⚠️ Failed to generate summary" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+        done
+
+        echo "✓ Turborepo summary generation complete"
