@@ -33,6 +33,6 @@ jobs:
 Finally, as one of the latest steps, run Turborepo Summary action to generate a summary:
 
 ```yml
-- uses: actions/turborepo-summary
+- uses: charpeni/turborepo-summary-action@v1
   if: always()
 ```
