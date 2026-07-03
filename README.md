@@ -2,6 +2,9 @@
 
 This action generates human-readable markdown reports from [Turborepo](https://turborepo.com/) run [summary](https://turborepo.com/docs/reference/run#--summarize) JSON output.
 
+> [!NOTE]
+> This is a thin GitHub Action wrapper around the [`turborepo-summary`](https://github.com/charpeni/turborepo-summary) CLI. To generate reports outside of GitHub Actions, use the [CLI directly](https://www.npmjs.com/package/turborepo-summary).
+
 <p align="center">
   <img height="800" alt="Example" src="https://github.com/user-attachments/assets/f870a9c5-5eb3-4902-a1a1-729831852f10" />
 </p>
